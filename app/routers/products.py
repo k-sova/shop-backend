@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.models.categories import Category as CategoryModel
 from app.models.products import Product as ProductModel
 from app.schemas import Product as ProductSchema, ProductCreate
-from app.db_depends import get_db
+from app.db_depends import get_async_db
 
 # Создаём маршрутизатор для товаров
 router = APIRouter(
@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 @router.get("/", response_model=list[ProductSchema], status_code=status.HTTP_200_OK)
-async def get_all_products(db: Session = Depends(get_db)):
+async def get_all_products(db: Session = Depends(get_async_db)):
     """
     Возвращает список всех товаров.
     """
@@ -27,7 +27,7 @@ async def get_all_products(db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=ProductSchema, status_code=status.HTTP_201_CREATED)
-async def create_product(product: ProductCreate, db: Session = Depends(get_db)):
+async def create_product(product: ProductCreate, db: Session = Depends(get_async_db)):
     """
     Создаёт новый товар.
     """
@@ -49,7 +49,7 @@ async def create_product(product: ProductCreate, db: Session = Depends(get_db)):
 @router.get("/category/{category_id}",
             response_model=list[ProductSchema],
             status_code=status.HTTP_200_OK)
-async def get_products_by_category(category_id: int, db: Session = Depends(get_db)):
+async def get_products_by_category(category_id: int, db: Session = Depends(get_async_db)):
     """
     Возвращает список товаров в указанной категории по её ID.
     """
@@ -71,7 +71,7 @@ async def get_products_by_category(category_id: int, db: Session = Depends(get_d
 @router.get("/{product_id}",
             response_model=ProductSchema,
             status_code=status.HTTP_200_OK)
-async def get_product(product_id: int, db: Session = Depends(get_db)):
+async def get_product(product_id: int, db: Session = Depends(get_async_db)):
     """
     Возвращает детальную информацию о товаре по его ID.
     """
@@ -97,7 +97,7 @@ async def get_product(product_id: int, db: Session = Depends(get_db)):
 @router.put("/{product_id}",
             response_model=ProductSchema,
             status_code=status.HTTP_200_OK)
-async def update_product(product_id: int, product: ProductCreate, db: Session = Depends(get_db)):
+async def update_product(product_id: int, product: ProductCreate, db: Session = Depends(get_async_db)):
     """
     Обновляет товар по его ID.
     """
@@ -127,7 +127,7 @@ async def update_product(product_id: int, product: ProductCreate, db: Session = 
 
 
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_product(product_id: int, db: Session = Depends(get_db)):
+async def delete_product(product_id: int, db: Session = Depends(get_async_db)):
     """
     Удаляет товар по его ID.
     """
