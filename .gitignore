@@ -9,6 +9,9 @@ __pycache__/
 # DB
 *.db
 
+#.env
+.env.docker
+
 # Distribution / packaging
 .Python
 build/

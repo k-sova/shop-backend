@@ -1,0 +1,28 @@
+services:
+  shop_db:
+    image: postgres:16
+    container_name: shop_db
+    env_file:
+      - .env.docker
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    # expose:
+      # - "5432"
+
+  shop_pgadmin:
+    image: dpage/pgadmin4:7
+    container_name: shop_pgadmin
+    env_file:
+      - .env.docker
+    ports:
+      - "8080:80"
+    depends_on:
+      - shop_db
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  pgdata:
+  pgadmin_data:
