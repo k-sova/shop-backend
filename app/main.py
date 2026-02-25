@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 
 from app.routers import categories, products
 
@@ -20,4 +21,5 @@ async def root():
     """
     Корневой маршрут, подтверждающий, что API работает.
     """
-    return {"message": "Добро пожаловать в API интернет-магазина!"}
+    # return {"message": "Добро пожаловать в API интернет-магазина!"}
+    return RedirectResponse(url='/docs')
