@@ -19,7 +19,8 @@ async def get_all_categories(db: AsyncSession = Depends(get_async_db)):
     Возвращает список всех активных категорий.
     """
     stmt = select(CategoryModel).where(CategoryModel.is_active == True)
-    categories = db.scalars(stmt).all()
+    result = await db.scalars(stmt)
+    categories = result.all()
     return categories
 
 
@@ -28,8 +29,11 @@ async def get_category(category_id: int, db: AsyncSession = Depends(get_async_db
     """
     Возвращает категорию по ид
     """
-    result = db.get(CategoryModel, category_id)
-    if result is None:
+    stmt = select(CategoryModel).where(CategoryModel.id == category_id,
+                                       CategoryModel.is_active)
+    result = await db.scalars(stmt)
+    category = result.first()
+    if category is None:
         raise HTTPException(status_code=400, detail="Category not found")
     return result
 
@@ -64,26 +68,27 @@ async def update_category(category_id: int, category: CategoryCreate, db: AsyncS
     # Проверка существования категории
     stmt = select(CategoryModel).where(CategoryModel.id == category_id,
                                        CategoryModel.is_active == True)
-    db_category = db.scalars(stmt).first()
+    result = await db.scalars(stmt)
+    db_category = result.first()
     if db_category is None:
         raise HTTPException(status_code=404, detail="Category not found")
     
     # Проверка существования parent_id, если указан
     if category.parent_id is not None:
-        parent_stmt = select(CategoryModel).where(CategoryModel.id == category.parent_id,
+        stmt = select(CategoryModel).where(CategoryModel.id == category.parent_id,
                                                   CategoryModel.is_active == True)
-        parent = db.scalars(parent_stmt).first()
+        result = await db.scalars(stmt)
+        parent = result.first()
         if parent is None:
             raise HTTPException(status_code=400, detail="Parent category not found")
     
     # Обновление категории
-    db.execute(
-        update(CategoryModel)
-        .where(CategoryModel.id == category_id)
-        .values(**category.model_dump())
-    )
-    db.commit()
-    db.refresh(db_category)
+    stmt = (update(CategoryModel)
+            .where(CategoryModel.id == category_id)
+            .values(**category.model_dump()))
+    await db.execute(stmt)
+    await db.commit()
+    await db.refresh(db_category)
     return db_category
 
 
@@ -94,12 +99,14 @@ async def delete_category(category_id: int, db: AsyncSession = Depends(get_async
     """
     # Проверка существования активной категории
     stmt = select(CategoryModel).where(CategoryModel.id == category_id, CategoryModel.is_active == True)
-    category = db.scalars(stmt).first()
+    result = await db.scalars(stmt)
+    category = result.first()
     if category is None:
         raise HTTPException(status_code=404, detail="Category not found")
     
     # Логическое удаление категории (установка is_active=False)
-    db.execute(update(CategoryModel).where(CategoryModel.id == category_id).values(is_active=False))
-    db.commit()
+    stmt = update(CategoryModel).where(CategoryModel.id == category_id).values(is_active=False)
+    await db.execute(stmt)
+    await db.commit()
     
     return {"status": "success", "message": "Category marked as inactive"}
