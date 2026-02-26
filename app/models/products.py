@@ -1,5 +1,4 @@
 from typing import TYPE_CHECKING
-
 from decimal import Decimal
 from sqlalchemy import String, Boolean, Integer, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,7 +8,7 @@ from app.core.database import Base
 
 if TYPE_CHECKING:
     from app.models.categories import Category
-
+    from app.models.user import User
 
 class Product(Base):
     __tablename__ = "products"
@@ -22,5 +21,7 @@ class Product(Base):
     stock: Mapped[int] = mapped_column(Integer, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"), nullable=False)
+    seller_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
 
     category: Mapped["Category"] = relationship("Category", back_populates="products")
+    seller: Mapped["User"] = relationship("User", back_populates="products")
