@@ -8,7 +8,7 @@ from app.core.database import Base
 
 if TYPE_CHECKING:
     from app.models.categories import Category
-    from app.models.user import User
+    from app.models.users import User
 
 class Product(Base):
     __tablename__ = "products"
