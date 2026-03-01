@@ -105,4 +105,5 @@ async def delete_review(
     stmt = update(ReviewModel).where(ReviewModel.id == review_id).values(is_active=False)
     await db.execute(stmt)
     await db.commit()
+    await update_product_rating(db, review.product_id)
     return {'message': 'Review deleted'}

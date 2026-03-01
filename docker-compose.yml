@@ -1,4 +1,17 @@
 services:
+  shop_backend:
+    container_name: shop_backend
+    # Берем Dockerfile из каталога app
+    build:
+      context: .
+      dockerfile: ./app/Dockerfile
+    # Запускаем тестовый сервер
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0"
+    # Открываем порт 8000 внутри и снаружи
+    ports:
+      - 8000:8000
+    depends_on:
+      - shop_db 
   shop_db:
     image: postgres:16
     container_name: shop_db
@@ -9,8 +22,7 @@ services:
     ports:
       - "5432:5432"
     # expose:
-      # - "5432"
-
+    #   - "5432"
   shop_pgadmin:
     image: dpage/pgadmin4:7
     container_name: shop_pgadmin
