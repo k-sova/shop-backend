@@ -1,6 +1,6 @@
 
 from typing import Annotated
-from pydantic import BaseModel, Field, ConfigDict, EmailStr, StringConstraints, PositiveInt
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, StringConstraints, PositiveInt, NonNegativeInt
 from decimal import Decimal
 import datetime
 
@@ -251,3 +251,38 @@ class ReviewCreate(Review):
     Схема для создания комментария
     """
     pass
+
+
+class ProductList(BaseModel):
+    """
+    Список пагинации для товаров.
+    """
+    items: Annotated[
+        list[Product],
+        Field(
+            description="Товары для текущей страницы"
+        )
+    ]
+    total: Annotated[
+        NonNegativeInt, 
+        Field(
+            ge=0, 
+            description="Общее количество товаров"
+        )
+    ]
+    page: Annotated[
+        PositiveInt,
+        Field(
+            ge=1,
+            description="Номер текущей страницы"
+        )
+    ]
+    page_size: Annotated[
+        PositiveInt,
+        Field(
+            ge=1, 
+            description="Количество элементов на странице"
+        )
+    ]
+    
+    model_config = ConfigDict(from_attributes=True)  # Для чтения из ORM-объектов
