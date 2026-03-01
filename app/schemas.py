@@ -1,98 +1,253 @@
-from pydantic import BaseModel, Field, ConfigDict, EmailStr
+
+from typing import Annotated
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, StringConstraints, PositiveInt
 from decimal import Decimal
 import datetime
 
-
-class CategoryCreate(BaseModel):
-    """
-    Модель для создания и обновления категории.
-    Используется в POST и PUT запросах.
-    """
-    name: str = Field(..., min_length=3, max_length=50,
-                      description='Название категории (3-50 символов)')
-    parent_id: int | None = Field(None, description='ID родительской категории, если есть')
-
+str30 = Annotated[
+    str,
+    StringConstraints(min_length=1, max_length=30, strip_whitespace=True)
+]
+str100 = Annotated[
+    str,
+    StringConstraints(min_length=1, max_length=30, strip_whitespace=True)
+]
+str500 = Annotated[
+    str,
+    StringConstraints(min_length=1, max_length=30, strip_whitespace=True)
+]
+str200 = Annotated[
+    str,
+    StringConstraints(min_length=1, max_length=30, strip_whitespace=True)
+]
+IsActive = Annotated[
+    bool,
+    Field(
+        ...,
+        description='Активна ли запись'
+    )
+]
 
 class Category(BaseModel):
     """
-    Модель для ответа с данными категории.
-    Используется в GET-запросах.
+        Родительская схема для категорий
     """
-    id: int = Field(..., description='Уникальный идентификатор категории')
-    name: str = Field(..., description='Название категории')
-    parent_id: int | None = Field(None, description='ID родительской категории, если есть')
-    is_active: bool = Field(..., description='Активность категории')
+    name: Annotated[
+        str30,
+        Field(description='Название категории',
+              examples=['Машины', 'Холодильники'])
+    ]
+    parent_id: Annotated[
+        int | None,
+        Field(description='Идентификатор родительской категории')
+    ]
+
+class CategoryCreate(Category):
+    """
+        Схема для создания и обновления категории.
+        Используется в POST и PUT запросах.
+    """
+    pass
+
+class CategoryRead(Category):
+    """
+        Схема для ответа с данными категории.
+        Используется в GET-запросах.
+    """
+    id: Annotated[
+        int,
+        Field(
+            ..., 
+            description='Уникальный идентификатор категории'
+        )
+    ]
+    is_active: IsActive
 
     model_config = ConfigDict(from_attributes=True)
-
-
-class ProductCreate(BaseModel):
-    """
-    Модель для создания и обновления товара.
-    Используется в POST и PUT запросах.
-    """
-    name: str = Field(..., min_length=3, max_length=100,
-                      description='Название товара (3-100 символов)')
-    description: str | None = Field(None, max_length=500,
-                                       description='Описание товара (до 500 символов)')
-    price: Decimal = Field(..., gt=0, description='Цена товара (больше 0)', decimal_places=2)
-    image_url: str | None = Field(None, max_length=200, description='URL изображения товара')
-    stock: int = Field(..., ge=0, description='Количество товара на складе (0 или больше)')
-    category_id: int = Field(..., description='ID категории, к которой относится товар')
-
 
 class Product(BaseModel):
     """
-    Модель для ответа с данными товара.
-    Используется в GET-запросах.
+    Родительская схема для продуктов
     """
-    id: int = Field(..., description='Уникальный идентификатор товара')
-    name: str = Field(..., description='Название товара')
-    description: str | None = Field(None, description='Описание товара')
-    price: Decimal = Field(..., description='Цена товара в рублях', gt=0, decimal_places=2)
-    image_url: str | None = Field(None, description='URL изображения товара')
-    stock: int = Field(..., description='Количество товара на складе')
-    category_id: int = Field(..., description='ID категории')
-    is_active: bool = Field(..., description='Активность товара')
-    rating: float = Field(..., description='Рейтинг товара')
+    name: Annotated[
+        str100,
+        Field(
+            ..., 
+            description='Название товара',
+            examples=['Порш', 'Самсунг']
+        )
+    ]
+    description: Annotated[
+        str500 | None,
+        Field(
+            None,
+            description='Описание товара',
+            examples=['Быстрее лошади']
+        )
+    ]
+    price: Annotated[
+        Decimal,
+        Field(
+            ...,
+            gt=0,
+            description='Цена товара',
+            examples=['2.05', '1213.23'],
+            decimal_places=2
+        )
+    ]
+    image_url: Annotated[
+        str200 | None,
+        Field(
+            None,
+            description='URL изображения товара'
+        )
+    ]
+    stock: Annotated[
+        PositiveInt,
+        Field(
+            ...,
+            description='Количество товара на складе'
+        )
+    ]
+    category_id: Annotated[
+        int,
+        Field(
+            ...,
+            description='ID категории, к которой относится товар'
+        )
+    ]
+
+class ProductCreate(Product):
+    """
+        Модель для создания и обновления товара.
+        Используется в POST и PUT запросах.
+    """
+    pass
+
+class ProductRead(Product):
+    """
+        Модель для ответа с данными товара.
+        Используется в GET-запросах.
+    """
+    id: Annotated[
+        int,
+        Field(
+            ..., 
+            description='Уникальный идентификатор товара'
+        )
+    ]
+    is_active: IsActive
+    rating: Annotated[
+        float,
+        Field(
+            ..., 
+            description='Рейтинг товара'
+        )
+    ]
+    
     model_config = ConfigDict(from_attributes=True)
     
-
-class Review(BaseModel):
-    """
-    Модель для ответа с данными комментария
-    """
-    id: int = Field(..., description='Уникальный идентификатор товара')
-    user_id: int = Field(..., description='Идентификатор комментатора')
-    product_id: int = Field(..., description='Идентификатор комментируемого товара')
-    comment: str | None = Field(description='Текстовый комментатор')
-    comment_date: datetime.datetime = Field(..., description='Дата и время написания комментария')
-    grade: int = Field(description='Оставленная оцена товару')
-    is_active: bool = Field(..., description='Активность комментария')
-
-
-class ReviewCreate(BaseModel):
-    """
-    Схема для создания комментария
-    """
-    product_id: int = Field(..., description='Идентификатор комментируемого товара')
-    comment: str | None = Field(description='Текстовый комментатор')
-    grade: int = Field(description='Оставленная оцена товару', ge=0, le=5)
-
-
-class UserCreate(BaseModel):
-    email: EmailStr = Field(description='Email пользователя')
-    password: str = Field(min_length=8, description='Пароль (минимум 8 символов)')
-    role: str = Field(default='buyer', pattern='^(buyer|seller)$', description='Роль: "buyer" или "seller"')
-
-
+    
 class User(BaseModel):
+    email: Annotated[
+        EmailStr,
+        Field(
+            ...,
+            description='Email пользователя'
+        )
+    ]
+    role: Annotated[
+        str, 
+        Field(
+            default='buyer', 
+            pattern='^(buyer|seller|admin)$', 
+            description='Роль: "admin", "buyer" или "seller"'
+        )
+    ]
+
+
+class UserCreate(User):
+    """
+        Схема для создания пользователя
+    """
+    password: Annotated[
+        str30,
+        Field(
+            ...,
+            description='Пароль (минимум 8 символов)'
+        )
+    ]
+
+
+class UserRead(BaseModel):
+    """
+        Схема для ответа с данными пользователя
+    """
     id: int
-    email: EmailStr
-    is_active: bool
-    role: str
+    is_active: IsActive
     model_config = ConfigDict(from_attributes=True)
     
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
+    
+    
+class Review(BaseModel):
+    product_id: Annotated[
+        int,
+        Field(
+            ..., 
+            description='Идентификатор комментируемого товара'
+        )
+    ]
+    comment: Annotated[
+        str500 | None,
+        Field(
+            None,
+            description='Текстовый комментатор'
+        )
+    ]
+    grade: Annotated[
+        int, 
+        Field(
+            ...,
+            description='Оставленная оцена товару', 
+            ge=0, 
+            le=5
+        )
+    ]
+
+
+class ReviewRead(Review):
+    """
+        Модель для ответа с данными комментария
+    """
+    id: Annotated[
+        int,
+        Field(
+            ..., 
+            description='Уникальный идентификатор товара'
+        )
+    ]
+    user_id: Annotated[
+        int,
+        Field(
+            ...,
+            description='Идентификатор комментатора'
+        )
+    ]
+    comment_date: Annotated[
+        datetime.datetime, 
+        Field(
+            ..., 
+            description='Дата и время написания комментария'
+        )
+    ]
+    is_active: IsActive
+
+
+class ReviewCreate(Review):
+    """
+    Схема для создания комментария
+    """
+    pass

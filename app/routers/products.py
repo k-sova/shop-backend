@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.categories import Category as CategoryModel
 from app.models.products import Product as ProductModel
 from app.models.users import User as UserModel
-from app.schemas import Product as ProductSchema, ProductCreate
+from app.schemas import ProductRead, ProductCreate # изменить
 from app.db_depends import get_async_db
 from app.auth import get_current_seller
 
@@ -17,7 +17,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=list[ProductSchema], status_code=status.HTTP_200_OK)
+@router.get("/", response_model=list[ProductRead], status_code=status.HTTP_200_OK)
 async def get_all_products(db: Session = Depends(get_async_db)):
     """
     Возвращает список всех товаров.
@@ -31,7 +31,7 @@ async def get_all_products(db: Session = Depends(get_async_db)):
 
 
 
-@router.post("/", response_model=ProductSchema, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=ProductRead, status_code=status.HTTP_201_CREATED)
 async def create_product(
     product: ProductCreate,
     db: AsyncSession = Depends(get_async_db),
@@ -53,7 +53,7 @@ async def create_product(
 
 
 @router.get("/category/{category_id}",
-            response_model=list[ProductSchema],
+            response_model=list[ProductRead],
             status_code=status.HTTP_200_OK)
 async def get_products_by_category(category_id: int, db: Session = Depends(get_async_db)):
     """
@@ -76,7 +76,7 @@ async def get_products_by_category(category_id: int, db: Session = Depends(get_a
 
 
 @router.get("/{product_id}",
-            response_model=ProductSchema,
+            response_model=ProductRead,
             status_code=status.HTTP_200_OK)
 async def get_product(product_id: int, db: Session = Depends(get_async_db)):
     """
@@ -101,7 +101,7 @@ async def get_product(product_id: int, db: Session = Depends(get_async_db)):
     return db_product
 
 
-@router.put("/{product_id}", response_model=ProductSchema)
+@router.put("/{product_id}", response_model=ProductRead)
 async def update_product(
     product_id: int,
     product: ProductCreate,
@@ -130,7 +130,7 @@ async def update_product(
     return db_product
 
 
-@router.delete("/{product_id}", response_model=ProductSchema)
+@router.delete("/{product_id}", response_model=ProductRead)
 async def delete_product(
     product_id: int,
     db: AsyncSession = Depends(get_async_db),

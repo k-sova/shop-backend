@@ -3,7 +3,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.categories import Category as CategoryModel
-from app.schemas import Category as CategorySchema, CategoryCreate
+from app.schemas import CategoryRead, CategoryCreate # поменять
 from app.db_depends import get_async_db
 
 # Создаём маршрутизатор с префиксом и тегом
@@ -13,7 +13,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=list[CategorySchema])
+@router.get("/", response_model=list[CategoryRead])
 async def get_all_categories(db: AsyncSession = Depends(get_async_db)):
     """
     Возвращает список всех активных категорий.
@@ -24,7 +24,7 @@ async def get_all_categories(db: AsyncSession = Depends(get_async_db)):
     return categories
 
 
-@router.get("/{category_id}", response_model=CategorySchema)
+@router.get("/{category_id}", response_model=CategoryRead)
 async def get_category(category_id: int, db: AsyncSession = Depends(get_async_db)):
     """
     Возвращает категорию по ид
@@ -38,7 +38,7 @@ async def get_category(category_id: int, db: AsyncSession = Depends(get_async_db
     return result
 
 
-@router.post("/", response_model=CategorySchema, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=CategoryRead, status_code=status.HTTP_201_CREATED)
 async def create_category(category: CategoryCreate, db: AsyncSession = Depends(get_async_db)):
     """
     Создаёт новую категорию.
@@ -60,7 +60,7 @@ async def create_category(category: CategoryCreate, db: AsyncSession = Depends(g
     return db_category
 
 
-@router.put("/{category_id}", response_model=CategorySchema)
+@router.put("/{category_id}", response_model=CategoryRead)
 async def update_category(category_id: int, category: CategoryCreate, db: AsyncSession = Depends(get_async_db)):
     """
     Обновляет категорию по её ID.
