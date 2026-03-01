@@ -7,6 +7,7 @@ from app.core.database import Base
 
 if TYPE_CHECKING:
     from app.models.products import Product
+    from app.models.reviews import Review
 
 class User(Base):
     __tablename__ = "users"
@@ -18,3 +19,4 @@ class User(Base):
     role: Mapped[str] = mapped_column(String, default="buyer")  # "buyer" or "seller"
 
     products: Mapped[list["Product"]] = relationship("Product", back_populates="seller")
+    reviews: Mapped[list['Review']] = relationship('Review', back_populates='user', uselist=True)
