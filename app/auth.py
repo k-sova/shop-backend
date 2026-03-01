@@ -15,6 +15,8 @@ from app.db_depends import get_async_db
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+REFRESH_TOKEN_EXPIRE_DAYS = 7 
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token")
 
 def hash_password(password: str) -> str:
@@ -31,13 +33,30 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
+
 def create_access_token(data: dict):
     """
-    Создаёт JWT с payload (sub, role, id, exp).
+    Создаёт access-токен.
     """
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
+    to_encode.update({
+        "exp": expire,
+        "token_type": "access",
+    })
+    return jwt.encode(to_encode, settings.jwt.get_token, algorithm=settings.jwt.get_algorithm)
+
+
+def create_refresh_token(data: dict):
+    """
+    Создаёт refresh-токен с длительным сроком действия и token_type="refresh".
+    """
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode.update({
+        "exp": expire,
+        "token_type": "refresh",
+    })
     return jwt.encode(to_encode, settings.jwt.get_token, algorithm=settings.jwt.get_algorithm)
 
 
