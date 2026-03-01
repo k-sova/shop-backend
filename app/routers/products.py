@@ -151,5 +151,3 @@ async def delete_product(
         update(ProductModel).where(ProductModel.id == product_id).values(is_active=False)
     )
     await db.commit()
-    await db.refresh(product)
-    return product
