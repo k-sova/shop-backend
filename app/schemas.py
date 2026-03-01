@@ -10,15 +10,15 @@ str30 = Annotated[
 ]
 str100 = Annotated[
     str,
-    StringConstraints(min_length=1, max_length=30, strip_whitespace=True)
+    StringConstraints(min_length=1, max_length=100, strip_whitespace=True)
 ]
 str500 = Annotated[
     str,
-    StringConstraints(min_length=1, max_length=30, strip_whitespace=True)
+    StringConstraints(min_length=1, max_length=500, strip_whitespace=True)
 ]
 str200 = Annotated[
     str,
-    StringConstraints(min_length=1, max_length=30, strip_whitespace=True)
+    StringConstraints(min_length=1, max_length=200, strip_whitespace=True)
 ]
 IsActive = Annotated[
     bool,
@@ -258,7 +258,7 @@ class ProductList(BaseModel):
     Список пагинации для товаров.
     """
     items: Annotated[
-        list[Product],
+        list[ProductRead],
         Field(
             description="Товары для текущей страницы"
         )
