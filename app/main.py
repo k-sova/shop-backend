@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.routers import categories, products, users, reviews, cart, orders
 
@@ -17,6 +18,9 @@ app.include_router(users.router)
 app.include_router(reviews.router)
 app.include_router(cart.router)
 app.include_router(orders.router)
+
+# Подключение медиа
+app.mount("/media", StaticFiles(directory="media"), name="media")
 
 # Корневой эндпоинт для проверки
 @app.get("/")

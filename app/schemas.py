@@ -1,5 +1,6 @@
 
 from typing import Annotated
+from fastapi import Form
 from pydantic import BaseModel, Field, ConfigDict, EmailStr, StringConstraints, PositiveInt, NonNegativeInt
 from decimal import Decimal
 import datetime
@@ -95,13 +96,6 @@ class Product(BaseModel):
             decimal_places=2
         )
     ]
-    image_url: Annotated[
-        str200 | None,
-        Field(
-            None,
-            description='URL изображения товара'
-        )
-    ]
     stock: Annotated[
         PositiveInt,
         Field(
@@ -122,7 +116,22 @@ class ProductCreate(Product):
         Модель для создания и обновления товара.
         Используется в POST и PUT запросах.
     """
-    pass
+    @classmethod
+    def as_form(
+            cls,
+            name: Annotated[str, Form(...)],
+            price: Annotated[Decimal, Form(...)],
+            stock: Annotated[int, Form(...)],
+            category_id: Annotated[int, Form(...)],
+            description: Annotated[str | None, Form()] = None,
+    ) -> "ProductCreate":
+        return cls(
+            name=name,
+            description=description,
+            price=price,
+            stock=stock,
+            category_id=category_id,
+        )
 
 class ProductRead(Product):
     """
@@ -338,8 +347,8 @@ class Order(BaseModel):
     user_id: int = Field(..., description="ID пользователя")
     status: str = Field(..., description="Текущий статус заказа")
     total_amount: Decimal = Field(..., ge=0, description="Общая стоимость")
-    created_at: datetime = Field(..., description="Когда заказ был создан")
-    updated_at: datetime = Field(..., description="Когда последний раз обновлялся")
+    created_at: datetime.datetime = Field(..., description="Когда заказ был создан")
+    updated_at: datetime.datetime = Field(..., description="Когда последний раз обновлялся")
     items: list[OrderItem] = Field(default_factory=list, description="Список позиций")
 
     model_config = ConfigDict(from_attributes=True)
