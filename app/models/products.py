@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     from app.models.users import User
     from app.models.reviews import Review
     from app.models.cart_items import CartItem
+    from app.models.orders import OrderItem
+
 
 class Product(Base):
     __tablename__ = "products"
@@ -30,3 +32,4 @@ class Product(Base):
     seller: Mapped["User"] = relationship("User", back_populates="products")
     reviews: Mapped[list['Review']] = relationship('Review', back_populates='product', uselist=True)
     cart_items: Mapped[list["CartItem"]] = relationship("CartItem", back_populates="product", cascade="all, delete-orphan")
+    order_items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates="product")
